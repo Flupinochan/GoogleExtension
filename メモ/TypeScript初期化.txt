@@ -1,0 +1,10 @@
+# Node.js、npmの確認
+node -v
+npm -v
+
+# npm、TypeScript初期化
+npm init -y
+npm install typescript --save-dev
+npx tsc --init
+npm install --save-dev @types/chrome
+npm install --save-dev chrome-types

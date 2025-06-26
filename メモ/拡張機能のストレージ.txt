@@ -1,0 +1,1 @@
+拡張機能は、Storage API と IndexedDB を使用してアプリケーションの状態を保存

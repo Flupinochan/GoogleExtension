@@ -1,0 +1,2 @@
+https://www.npmjs.com/package/chrome-types
+Chrome-Typesを利用すると、Chrome APIの補完が可能

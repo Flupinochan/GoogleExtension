@@ -1,0 +1,8 @@
+・local
+C:\Users\ユーザ名\AppData\Local\Google\Chrome\User Data\Default\Local Extension Settings
+
+・session
+RAM(メモリ)
+
+・sync
+Googleクラウドストレージ (アカウントで同期可能)

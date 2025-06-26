@@ -1,0 +1,20 @@
+{
+  "name": "autoclipcopy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/chrome": "^0.0.308",
+    "@types/node": "^22.13.10",
+    "chrome-types": "^0.1.345",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1"
+  }
+}

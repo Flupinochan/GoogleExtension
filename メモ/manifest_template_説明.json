@@ -1,0 +1,88 @@
+// https://github.com/GoogleChrome/chrome-extensions-samples/tree/main/functional-samples
+{
+  "manifest_version": 3,
+  "name": "拡張機能固有名称",
+  "short_name": "拡張機能12文字未満のショート名",
+  "version": "0.0.1",
+  "version_name": "dev バージョン名称",
+  "description": "拡張機能の説明",
+  "icons": {
+    "16": "images/icon-16_PNG形式で指定.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48_拡張機能ページのアイコン.png",
+    "128": "images/icon-128_Webストアで表示される必須アイコン.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png_拡張機能のアイコン",
+      "24": "images/icon24.png",
+      "32": "images/icon32.png"
+    },
+    "default_title": "chrome.action.onClicked.addListener_はpopupがない場合の拡張機能アイコンクリック時のEventListener",
+    "default_popup": "拡張機能アイコンをクリックした際に表示されるHTMLファイル_popup.html"
+  },
+  "author": "metalmental",
+  "background": {
+    "service_worker": "service-worker.js_拡張機能インストール時/拡張機能のバージョン更新時に起動する関数などを設定_DOMは操作しない",
+    "type": "module"
+  },
+  "chrome_settings_overrides": {
+    "homepage": "https://www.metalmental.net",
+    "startup_pages": [
+      "https://www.metalmental.net"
+    ]
+  },
+  "chrome_url_overrides": {
+    "chrome://newtab": "https://www.metalmental.net"
+  },
+  "commands": {
+    "toggle-feature-foo_ショートカットトリガー_chrome.commands.onCommand.addListener": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+0"
+      },
+      "description": "Toggle feature foo",
+      "global": true
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>_全てのURLに対象CSS、JavaScriptを挿入"
+      ],
+      "css": [
+        "my-styles.css"
+      ],
+      "js": [
+        "content-script1.js",
+        "content-script2.js"
+      ],
+      "run_at": "document_end_DOMが読み込まれたタイミングで実行"
+    }
+  ],
+  "devtools_page": "devtools.html_DeveloperToolにカスタムのパネルページを追加する",
+  "permissions": [
+    "activeTab_ChromeExtensionsAPIごとに権限を付与する",
+    "contextMenus",
+    "storage",
+    "sidePanel"
+  ],
+  "optional_permissions": [
+    "topSites"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "incognito": "split_シークレットモードにおける設定",
+  "key": "拡張機能固有ID",
+  "oauth2": "OAuth設定",
+  "omnibox": "URLバーのキーワード設定",
+  "options_ui": "拡張機能設定用ページ",
+  "side_panel": {
+    "default_path": "sidepanel.html_サイドパネル用ページ_chrome.sidePanel.open"
+  }
+}

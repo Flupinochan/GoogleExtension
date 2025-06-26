@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>選択テキスト処理</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+  <header>
+    <h1>テキスト選択 & AI処理</h1>
+  </header>
+
+  <main>
+    <p>このページのテキストを選択し、マウスを離すと処理が実行されます。</p>
+
+    <div class="output-box">
+      <h2>処理結果</h2>
+      <div class="result-section">
+        <h3>選択したテキスト</h3>
+        <p id="selected-text"></p>
+      </div>
+
+      <div class="result-section">
+        <h3>AI チャット応答</h3>
+        <p id="ai-response"></p>
+      </div>
+
+      <div class="result-section">
+        <h3>翻訳結果</h3>
+        <p id="translated-response"></p>
+      </div>
+
+      <div class="result-section">
+        <h3>要約</h3>
+        <p id="summary"></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/dynamic.js" type="module"></script>
+
+</html>

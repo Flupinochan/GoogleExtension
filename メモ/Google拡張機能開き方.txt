@@ -1,0 +1,2 @@
+URLに以下を入力
+chrome://extensions

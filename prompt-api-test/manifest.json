@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlkMQFwHcl2nVv0Kp2O38Dq/z5mH8F3sAecdiU60Wch9ozeNiTZBTDa9o+wMasdThrYObmDzcik0iCmPAQfghSixyiHCQN5CZdNC3LuZm9a7UuXOSUBn+rY22+piZDDNtg7qQVul9j6D4zqO6MiQceoGsRSl2x3CcURSQ9LyEDnX85i5IDg+DvhFiXiLnxv4MnvqvzjgEjUVXbyQJnEmNIOa65Aj4xedrFHDkv/Snquwlebry1TosiA1jLRitHh7aTW5SIviIdob9sYOmguzWEl2OTIpdB7ErZYwLTcfBnxBzuqpmMcALxMIto12UXI8C3YM1HMRSa4fqYKW4l0Qw7QIDAQAB",
+  "trial_tokens": [
+    "Ark0IDudEI275ROeucnac9RNoFkMfSWcwRCvLAyGRNlbpjIubWOdG24dJiti5cLGWJoISFbSF67Z+PQl6jOkXAMAAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vb21ham1vZmpsaGZqamFuZ2JnY2NtYWJiZGlibGloZm4iLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElGb3JFeHRlbnNpb24iLCJleHBpcnkiOjE3NjA0ODYzOTl9",
+    "Agk1tYm4yEjLzMuHNvlH2Uum9Mt3j97bOUL7wJpqW0yjThNNUE2LPf/ru/YUwUikjBKYyFmymUIrnkdpt9gtYw0AAABveyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vb21ham1vZmpsaGZqamFuZ2JnY2NtYWJiZGlibGloZm4iLCJmZWF0dXJlIjoiVHJhbnNsYXRpb25BUEkiLCJleHBpcnkiOjE3NTMxNDI0MDB9"
+  ],
+  "name": "prompt-api-test",
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "images/icon.png"
+  },
+  "permissions": [
+    "aiLanguageModelOriginTrial",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "scripts/dynamic.js"
+      ]
+    }
+  ]
+}
