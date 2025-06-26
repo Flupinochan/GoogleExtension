@@ -7,7 +7,10 @@ async function main() {
   if (selectedText.isErr())
     return;
   const translatedText = await translate(selectedText.value);
-  console.log(translatedText);
+  if (translatedText.isErr())
+    return;
+  console.log(translatedText.value);
+  showTextPopup(translatedText.value);
 }
 
 /**
@@ -34,6 +37,47 @@ async function translate(text: string): Promise<Result<string, Failure>> {
   } catch (error) {
     return err({ code: 2, message: "error" });
   }
+}
+
+/**
+ * テキストをポップアップ表示
+ */
+function showTextPopup(text: string): void {
+  // 既存のポップアップがあれば削除
+  const existingPopup = document.querySelector('.selection-translate-popup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+
+  // 選択範囲の位置を取得
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+
+  // ポップアップ要素を作成
+  const popup = document.createElement('div');
+  popup.className = 'selection-translate-popup';
+  popup.textContent = text;
+
+  // ポップアップのスタイルを設定
+  popup.style.cssText = `
+    position: absolute;
+    left: ${rect.left + window.scrollX}px;
+    top: ${rect.bottom + window.scrollY + 5}px;
+    z-index: 10000;
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  `;
+
+  // ページに追加
+  document.body.appendChild(popup);
 }
 
 interface Failure {

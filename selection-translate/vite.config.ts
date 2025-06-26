@@ -10,10 +10,10 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'main.js',
+        entryFileNames: 'scripts/main.js',
       }
     },
-    outDir: 'dist',
-    emptyOutDir: true
+    outDir: 'selection-translate',
+    emptyOutDir: false,
   }
 });

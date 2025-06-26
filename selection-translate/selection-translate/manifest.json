@@ -20,6 +20,9 @@
       "32": "images/icon-32.png"
     }
   },
+  "permissions": [
+    "activeTab"
+  ],
   "content_scripts": [
     {
       "matches": [
