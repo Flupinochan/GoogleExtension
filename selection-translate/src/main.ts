@@ -22,10 +22,20 @@ async function main() {
  * Selection APIで選択されている文字列を取得
  */
 async function getSelectionText(): Promise<Result<string, Failure>> {
+  // 1文字以上Selectionされているかどうか
   const selection = window.getSelection();
-  if (selection !== null && selection.rangeCount > 0 && !selection.isCollapsed)
-    return ok(selection.toString());
-  return err({ code: 1, message: "error" });
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    return err({ code: 1, message: "error" });
+  }
+
+  // ポップアップ要素divがSelectionされているかどうか
+  const range = selection.getRangeAt(0);
+  const popup = document.querySelector('.selection-translate-popup');
+  if (popup && (popup.contains(range.startContainer) || popup.contains(range.endContainer))) {
+    return err({ code: 1, message: "error" });
+  }
+
+  return ok(selection.toString());
 }
 
 /**

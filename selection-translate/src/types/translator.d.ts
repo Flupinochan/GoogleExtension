@@ -1,4 +1,5 @@
 // Translator APIの型定義
+// https://developer.mozilla.org/en-US/docs/Web/API/Translator
 export declare global {
   class Translator {
     static create(options: {
@@ -11,6 +12,10 @@ export declare global {
       targetLanguage: string;
     }): Promise<string>;
 
+    destroy();
+
     translate(text: string): Promise<string>;
+
+    translateStreaming(input): ReadableStream;
   }
 }
