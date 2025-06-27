@@ -12,10 +12,10 @@ export declare global {
       targetLanguage: string;
     }): Promise<string>;
 
-    destroy();
-
     translate(input: string): Promise<string>;
 
     translateStreaming(input: string): ReadableStream;
+
+    destroy();
   }
 }

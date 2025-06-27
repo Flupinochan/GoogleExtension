@@ -60,15 +60,34 @@ async function getSelectionText(): Promise<Result<string, Failure>> {
 // }
 
 /**
+ * 入力文字列の言語を判定
+ */
+async function detectLanguage(text: string): Promise<Result<string, Failure>> {
+  const detector = await LanguageDetector.create();
+  try {
+    const detectedLanguages = await detector.detect(text);
+    return ok(detectedLanguages[0].detectedLanguage);
+  } catch (error) {
+    return err({ code: 2, message: "error" });
+  } finally {
+    detector.destroy();
+  }
+}
+
+/**
  * Translate APIでストリーミング翻訳
  */
 async function translateStreaming(text: string): Promise<Result<string, Failure>> {
-  try {
-    const translator = await Translator.create({
-      sourceLanguage: 'en',
-      targetLanguage: 'ja',
-    });
+  const sourceLanguage = await detectLanguage(text);
+  if (sourceLanguage.isErr())
+    return err({ code: 2, message: "error" });
 
+  const translator = await Translator.create({
+    sourceLanguage: sourceLanguage.value,
+    targetLanguage: 'ja',
+  });
+
+  try {
     const stream = translator.translateStreaming(text);
     const reader = stream.getReader();
     const popup = createPopup();
@@ -85,10 +104,11 @@ async function translateStreaming(text: string): Promise<Result<string, Failure>
       return ok(translation);
     } finally {
       reader.releaseLock();
-      translator.destroy();
     }
   } catch (error) {
     return err({ code: 2, message: "error" });
+  } finally {
+    translator.destroy();
   }
 }
 
@@ -116,25 +136,26 @@ function createPopup(): HTMLDivElement {
   popup.className = 'selection-translate-popup';
   popup.textContent = "翻訳中..."; // 初期表示
 
-  // ポップアップのスタイルを設定（既存と同じ）
+  // ポップアップのスタイルを設定
   popup.style.cssText = `
-    position: absolute;
-    left: ${rect.left + window.scrollX}px;
-    top: ${rect.bottom + window.scrollY + 5}px;
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-size: 14px;
-    max-width: 300px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  `;
+  position: absolute;
+  left: ${rect.left + window.scrollX}px;
+  top: ${rect.bottom + window.scrollY + 5}px;
+  z-index: 10000;
+  background: linear-gradient(135deg, rgba(255, 75, 75, 0.3), rgba(75, 150, 255, 0.3));
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  max-width: 300px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+              0 0 20px rgba(255, 255, 255, 0.1) inset;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+`;
 
   document.body.appendChild(popup);
   setupClickOutsideHandler(popup);
