@@ -3,17 +3,17 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/main.ts',
-      name: 'MyScript',
+      entry: 'src/scripts/script.ts',
+      name: 'script',
       fileName: 'script',
       formats: ['iife'] // 単一ファイル出力
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'scripts/main.js',
+        entryFileNames: 'scripts/script.js',
       }
     },
-    outDir: 'selection-translate',
+    outDir: 'selection-translator',
     emptyOutDir: false,
   }
 });
