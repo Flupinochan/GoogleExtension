@@ -14,8 +14,8 @@ export declare global {
 
     destroy();
 
-    translate(text: string): Promise<string>;
+    translate(input: string): Promise<string>;
 
-    translateStreaming(input): ReadableStream;
+    translateStreaming(input: string): ReadableStream;
   }
 }
