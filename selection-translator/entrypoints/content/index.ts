@@ -1,17 +1,23 @@
+import { Result, ok, err } from 'neverthrow';
+import { languageStorage } from '../popup/App';
+import { ContentScriptContext } from '#imports';
+import { onMessage } from '../utils/messaging';
+
 export default defineContentScript({
   matches: ['<all_urls>'], // すべてのURLでコンテンツスクリプトを実行
-  main() {
+  main(ctx: ContentScriptContext) {
     // DOMが読み込まれた後にイベントリスナーを設定
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initializeContentScript);
     } else {
       initializeContentScript();
     }
+
+    onMessage('imageFromContextMenu', (imageUrl) => {
+      console.log(imageUrl.data);
+    });
   },
 });
-
-import { Result, ok, err } from 'neverthrow';
-import { languageStorage } from '../popup/App';
 
 interface Failure {
   code: number;
