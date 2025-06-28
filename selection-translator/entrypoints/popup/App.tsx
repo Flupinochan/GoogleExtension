@@ -1,7 +1,35 @@
-import { useState, useEffect } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { LanguageCode, LANGUAGES, languageStorage } from '../utils/local-storage';
 
+const AppContainer = styled.div`
+  width: 200px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 10px;
+  font-size: 18px;
+`;
+
+const GlassSelect = styled.select`
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  outline: none;
+
+  option {
+    background: #333;
+    color: white;
+  }
+`;
 
 function App() {
   const [language, setLanguage] = useState<LanguageCode>('ja');
@@ -21,12 +49,11 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <AppContainer>
       <div className="glass-container">
         <div className="form-group">
-          <label className="label">Translate to</label>
-          <select
-            className="glass-select"
+          <Label>Translate to</Label>
+          <GlassSelect
             value={language}
             onChange={handleLanguageChange}
           >
@@ -35,10 +62,10 @@ function App() {
                 {lang.name}
               </option>
             ))}
-          </select>
+          </GlassSelect>
         </div>
       </div>
-    </div>
+    </AppContainer>
   );
 }
 

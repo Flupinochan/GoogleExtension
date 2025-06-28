@@ -3,7 +3,7 @@ import { ContentScriptContext } from '#imports';
 import { Failure } from '../utils/interfaces';
 import { languageStorage } from './../utils/local-storage';
 import { getSelectionData, selectedData } from './utils/selectionManager';
-import { displayPopup, updatePopup } from './utils/uiManager';
+import { displayPopup } from './utils/uiManager';
 import { translateStreaming } from './ai/text';
 
 export default defineContentScript({
@@ -41,12 +41,10 @@ async function mainProcess() {
   for await (const result of translateStreaming(selectedData.selectedText)) {
     if (result.isOk()) {
       translatedText += result.value;
-      updatePopup(popup, translatedText);
+      popup.update(translatedText);
     } else {
-      popup.textContent = "Error: " + result.error.message;
+      popup.update("Error: " + result.error.message);
       break;
     }
   }
-
 }
-
