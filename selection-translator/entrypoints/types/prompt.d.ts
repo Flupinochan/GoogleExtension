@@ -29,12 +29,13 @@ export declare global {
 
   // ===== Expected Input/Output Types =====
   interface LanguageModelExpectedInput {
-    type: 'text' | 'image';
+    type: 'text' | 'audio' | 'image';
+    languages?: string[];
   }
 
   interface LanguageModelExpectedOutput {
     type: 'text';
-    language?: string;
+    languages?: string[];
   }
 
   // ===== Parameters =====

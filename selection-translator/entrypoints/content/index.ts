@@ -2,11 +2,7 @@ import { Result, ok, err } from 'neverthrow';
 import { languageStorage } from '../popup/App';
 import { ContentScriptContext } from '#imports';
 import { onMessage } from '../utils/messaging';
-
-interface Failure {
-  code: number;
-  message: string;
-}
+import { Failure } from '../utils/interfaces';
 
 export default defineContentScript({
   matches: ['<all_urls>'], // すべてのURLでコンテンツスクリプトを実行

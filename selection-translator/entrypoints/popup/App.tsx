@@ -1,19 +1,7 @@
-import { storage } from '#imports';
 import { useState, useEffect } from 'react';
 import './App.css';
+import { LanguageCode, LANGUAGES, languageStorage } from '../utils/local-storage';
 
-const LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'ja', name: '日本語' },
-  { code: 'zh', name: '中文' },
-  { code: 'ko', name: '한국어' },
-] as const;
-
-type LanguageCode = typeof LANGUAGES[number]['code'];
-
-export const languageStorage = storage.defineItem<LanguageCode>('local:selectedLanguage', {
-  init: () => 'ja',
-});
 
 function App() {
   const [language, setLanguage] = useState<LanguageCode>('ja');
