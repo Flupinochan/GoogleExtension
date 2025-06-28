@@ -7,8 +7,6 @@ interface TranslationPopupProps {
   onClose: () => void;
 }
 
-// selection-translator/entrypoints/content/components/TranslationPopup.tsx
-
 const PopupContainer = styled.div<{ x: number; y: number }>`
   position: absolute;
   left: ${props => props.x}px;
@@ -83,7 +81,6 @@ const LoadingIndicator = styled.div`
   }
 `;
 
-// React.FCを使わずに関数コンポーネントとして定義
 export function TranslationPopup(props: TranslationPopupProps) {
   const { text, position, onClose } = props;
   const popupRef = useRef<HTMLDivElement>(null);

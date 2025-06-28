@@ -1,8 +1,5 @@
-import { Result, ok, err } from 'neverthrow';
 import { ContentScriptContext } from '#imports';
-import { Failure } from '../utils/interfaces';
-import { languageStorage } from './../utils/local-storage';
-import { getSelectionData, selectedData } from './utils/selectionManager';
+import { getSelectionData } from './utils/selectionManager';
 import { displayPopup } from './utils/uiManager';
 import { translateStreaming } from './ai/text';
 
