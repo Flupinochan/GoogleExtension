@@ -12,7 +12,9 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "predev": "node clean-wxt-temp.js",
+    "prebuild": "node clean-wxt-temp.js"
   },
   "dependencies": {
     "@webext-core/messaging": "^2.3.0",

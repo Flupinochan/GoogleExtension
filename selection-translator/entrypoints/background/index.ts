@@ -8,8 +8,8 @@ export default defineBackground(() => {
     await aiModelDownload();
   });
   // ContextMenuクリック時の処理
-  browser.contextMenus.onClicked.addListener(async (event: Browser.contextMenus.OnClickData) => {
-    await onContextMenuClick(event);
+  browser.contextMenus.onClicked.addListener((info: Browser.contextMenus.OnClickData, tab?: Browser.tabs.Tab) => {
+    onContextMenuClick(info, tab);
   });
 });
 
@@ -22,7 +22,7 @@ function setupContextMenu() {
   });
 }
 
-// Service Workerで事前せい生成AIのModelをダウンロード
+// 事前に生成AIのModelをダウンロード
 async function aiModelDownload() {
   // Translatorのダウンロード
   const translator = await Translator.create({
@@ -45,14 +45,46 @@ async function aiModelDownload() {
     },
   });
   detector.destroy();
+
+  // Promptのダウンロード
+  const status = await LanguageModel.availability();
+  console.log(status);
+  const model = await LanguageModel.create({
+    monitor(m) {
+      m.addEventListener("downloadprogress", (e) => {
+        console.log(`LanguageModel Downloaded ${e.loaded * 100}%`);
+      });
+    },
+  });
+  model.destroy();
 }
 
 // ContextMenuクリック時の処理
-function onContextMenuClick(info: Browser.contextMenus.OnClickData) {
-  if (info.mediaType === 'image' && info.srcUrl !== undefined) {
-    const imageUrl = info.srcUrl;
+async function onContextMenuClick(info: Browser.contextMenus.OnClickData, tab?: Browser.tabs.Tab) {
+  const mediaType = info.mediaType;
+  const imageUrl = info.srcUrl;
+  const tabId = tab?.id;
+  const frameId = info.frameId;
+  if (mediaType === 'image' && imageUrl !== undefined && tabId !== undefined) {
     console.log(`${imageUrl}`);
-    // content.js に imageUrlを渡す
-    sendMessage('imageFromContextMenu', imageUrl);
+    // content.js に imageUrlを送信
+    const result = await transcribeFromImage(imageUrl);
+    console.log(result);
+    sendMessage('imageFromContextMenu', result, { tabId, frameId });
   }
+}
+
+// 画像文字お越し ※現在、PromptAPIはbackground.jsでしか使用できないため
+async function transcribeFromImage(imageData: string): Promise<string> {
+  const session = await LanguageModel.create({
+    initialPrompts: [{
+      role: "system",
+      content: "You are a friendly, helpful assistant. Answer in Japanese."
+    }]
+  });
+
+  const result = await session.prompt(
+    "日本語で回答可能でしょうか。"
+  );
+  return result;
 }

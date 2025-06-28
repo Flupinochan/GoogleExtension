@@ -3,6 +3,11 @@ import { languageStorage } from '../popup/App';
 import { ContentScriptContext } from '#imports';
 import { onMessage } from '../utils/messaging';
 
+interface Failure {
+  code: number;
+  message: string;
+}
+
 export default defineContentScript({
   matches: ['<all_urls>'], // すべてのURLでコンテンツスクリプトを実行
   main(ctx: ContentScriptContext) {
@@ -12,29 +17,25 @@ export default defineContentScript({
     } else {
       initializeContentScript();
     }
-
-    onMessage('imageFromContextMenu', (imageUrl) => {
-      console.log(imageUrl.data);
-    });
   },
 });
-
-interface Failure {
-  code: number;
-  message: string;
-}
 
 /**
  * コンテンツスクリプトの初期化
  */
 function initializeContentScript(): void {
-  document.addEventListener("mouseup", main);
+  document.addEventListener("mouseup", mainProcess);
+
+  // background.js から imageUrl を受信
+  onMessage('imageFromContextMenu', async (imageUrl) => {
+    console.log(imageUrl.data);
+  });
 }
 
 /**
  * メイン処理
  */
-async function main() {
+async function mainProcess() {
   const popup = createPopup();
   const selectedText = await getSelectionText();
   if (selectedText.isErr()) {
