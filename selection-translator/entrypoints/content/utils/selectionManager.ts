@@ -15,7 +15,7 @@ export async function getSelectionData(): Promise<Result<selectedData, Failure>>
   // 1文字以上選択されていなければエラー
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-    return err({ code: 1, message: "文字が選択されていません" });
+    return err({ code: 1, message: "1文字も選択されていません" });
   }
 
   // 翻訳結果を表示するポップアップ要素divがSelectionされていればエラー
@@ -23,7 +23,7 @@ export async function getSelectionData(): Promise<Result<selectedData, Failure>>
   const range = selection.getRangeAt(0);
   const popup = document.getElementById(POPUP_ID);
   if (popup && (popup.contains(range.startContainer) || popup.contains(range.endContainer))) {
-    return err({ code: 1, message: "ポップアップ要素が選択されています" });
+    return err({ code: 1, message: "ポップアップ要素は翻訳しません" });
   }
 
   return ok({

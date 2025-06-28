@@ -12,7 +12,7 @@ export async function detectLanguage(text: string): Promise<Result<string, Failu
     const detectedLanguages = await detector.detect(text);
     return ok(detectedLanguages[0].detectedLanguage);
   } catch (error) {
-    return err({ code: 2, message: "error" });
+    return err({ code: 2, message: "Language detection failed" });
   } finally {
     if (detector)
       detector.destroy();
@@ -27,7 +27,7 @@ export async function* translateStreaming(text: string): AsyncIterable<Result<st
   try {
     const sourceLanguage = await detectLanguage(text);
     if (sourceLanguage.isErr()) {
-      yield err({ code: 2, message: "Language detection failed" });
+      yield err({ code: 2, message: sourceLanguage.error.message });
       return;
     }
 
