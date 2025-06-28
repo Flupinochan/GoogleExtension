@@ -7,20 +7,16 @@ interface TranslationPopupProps {
   onClose: () => void;
 }
 
+// selection-translator/entrypoints/content/components/TranslationPopup.tsx
+
 const PopupContainer = styled.div<{ x: number; y: number }>`
   position: absolute;
   left: ${props => props.x}px;
   top: ${props => props.y}px;
   z-index: 10000;
   
-  /* ガラス風スタイル */
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.15),
-    rgba(255, 255, 255, 0.05)
-  );
-  backdrop-filter: blur(15px) saturate(180%);
-  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  /* popup背景色と同じグラデーション（不透明） */
+  background: linear-gradient(135deg, #667eea, #764ba2);
   
   /* ボーダーとシャドウ */
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -30,7 +26,7 @@ const PopupContainer = styled.div<{ x: number; y: number }>`
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   
   /* テキストスタイル */
-  color: rgba(255, 255, 255, 0.95);
+  color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   font-size: 14px;
   font-weight: 500;
@@ -55,11 +51,7 @@ const PopupContainer = styled.div<{ x: number; y: number }>`
   
   /* ホバー効果 */
   &:hover {
-    background: linear-gradient(
-      135deg, 
-      rgba(255, 255, 255, 0.2),
-      rgba(255, 255, 255, 0.08)
-    );
+    background: linear-gradient(135deg, #7488f0, #8b5bc7);
     border-color: rgba(255, 255, 255, 0.3);
   }
   
