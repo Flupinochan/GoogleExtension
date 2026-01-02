@@ -1,14 +1,14 @@
-import { ContentScriptContext } from '#imports';
-import { getSelectionData } from './utils/selectionManager';
-import { displayPopup } from './utils/uiManager';
-import { translateStreaming } from './ai/text';
-import { enabledStorage } from '../utils/local-storage';
+import type { ContentScriptContext } from "#imports";
+import { enabledStorage } from "../utils/storage";
+import { displayTranslationPopup } from "./components/translationPopupManager";
+import { getSelectionData } from "./services/selection";
+import { translateStreaming } from "./services/translation";
 
 export default defineContentScript({
-  matches: ['<all_urls>'],
-  main(ctx: ContentScriptContext) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeContentScript);
+  matches: ["<all_urls>"],
+  main(_ctx: ContentScriptContext) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initializeContentScript);
     } else {
       initializeContentScript();
     }
@@ -24,10 +24,9 @@ function initializeContentScript() {
   // 2. 他の部分をクリックして青線を消す
   // 3. 1で選択した青線が取得され翻訳されてしまうため
   // ※mouseUpした際に青線が消えるため
-  document.addEventListener("mousedown", (event) => {
+  document.addEventListener("mousedown", (_event) => {
     const selection = window.getSelection();
-    if (selection)
-      selection.removeAllRanges();
+    if (selection) selection.removeAllRanges();
   });
   document.addEventListener("mouseup", mainProcess);
 }
@@ -36,10 +35,11 @@ function initializeContentScript() {
  * メイン処理
  */
 async function mainProcess() {
-  const saved = await enabledStorage.getValue();
-  if (!saved) {
+  const enabled = await enabledStorage.getValue();
+  if (!enabled) {
     return;
   }
+
   const selectedDataResult = await getSelectionData();
   if (selectedDataResult.isErr()) {
     console.log(selectedDataResult.error.message);
@@ -47,7 +47,7 @@ async function mainProcess() {
   }
   const selectedData = selectedDataResult.value;
 
-  const popup = displayPopup(selectedData);
+  const popup = displayTranslationPopup(selectedData);
 
   let translatedText = "";
   for await (const result of translateStreaming(selectedData.selectedText)) {
@@ -55,7 +55,7 @@ async function mainProcess() {
       translatedText += result.value;
       popup.update(translatedText);
     } else {
-      popup.update("Error: " + result.error.message);
+      popup.update(`Error: ${result.error.message}`);
       break;
     }
   }

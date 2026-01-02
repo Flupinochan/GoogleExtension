@@ -1,6 +1,6 @@
-import { createRoot, Root } from 'react-dom/client';
-import { selectedData } from "./selectionManager";
-import { TranslationPopup } from '../components/TranslationPopup';
+import { createRoot, type Root } from "react-dom/client";
+import type { selectedData } from "../services/selection";
+import { TranslationPopup } from "./TranslationPopup";
 
 export const POPUP_ID = "selection-translate-popup";
 
@@ -10,7 +10,7 @@ let currentContainer: HTMLDivElement | null = null;
 /**
  * ポップアップ要素を作成、表示
  */
-export function displayPopup(selectedData: selectedData): {
+export function displayTranslationPopup(selectedData: selectedData): {
   update: (text: string) => void;
   close: () => void;
 } {
@@ -21,11 +21,11 @@ export function displayPopup(selectedData: selectedData): {
   const rect = selectedData.selectedRange.getBoundingClientRect();
   const position = {
     x: rect.left + window.scrollX,
-    y: rect.bottom + window.scrollY + 8
+    y: rect.bottom + window.scrollY + 8,
   };
 
   // Reactコンポーネント用のコンテナを作成
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   container.id = POPUP_ID;
   document.body.appendChild(container);
 
@@ -41,7 +41,7 @@ export function displayPopup(selectedData: selectedData): {
           text={text}
           position={position}
           onClose={closePopup}
-        />
+        />,
       );
     }
   };
@@ -54,7 +54,7 @@ export function displayPopup(selectedData: selectedData): {
       currentText = text;
       renderPopup(text);
     },
-    close: closePopup
+    close: closePopup,
   };
 }
 

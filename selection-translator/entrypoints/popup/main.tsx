@@ -1,25 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { createGlobalStyle } from 'styled-components';
-import App from './App.tsx';
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { useAppTheme } from "../utils/theme.ts";
+import App from "./App.tsx";
 
-const GlobalStyle = createGlobalStyle`
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-size: 16px;
-  }
+function Root() {
+  const theme = useAppTheme();
 
-  body {
-    margin: 0;
-    padding: 0;
-  }
-`;
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  );
+}
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element not found");
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <GlobalStyle />
-    <App />
+    <Root />
   </React.StrictMode>,
 );

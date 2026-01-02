@@ -1,36 +1,45 @@
-import { Failure } from "@/entrypoints/utils/interfaces";
-import { languageStorage } from "@/entrypoints/utils/local-storage";
-import { err, ok, Result } from "neverthrow";
+import { err, ok, type Result } from "neverthrow";
+import { languageStorage } from "@/entrypoints/utils/storage";
+import type { Failure } from "@/types";
 
 /**
  * LanguageDetectorで入力文字列の言語を判定
  */
-export async function detectLanguage(text: string): Promise<Result<string, Failure>> {
-  let detector: LanguageDetector | undefined = undefined;
+export async function detectLanguage(
+  text: string,
+): Promise<Result<string, Failure>> {
+  let detector: LanguageDetector | undefined;
   try {
     detector = await LanguageDetector.create();
     const detectedLanguages = await detector.detect(text);
     if (detectedLanguages[0].detectedLanguage === undefined) {
-      return err({ code: 2, message: "Language could not be detected" });
+      return err({
+        message: "Language could not be detected",
+      } satisfies Failure);
     }
     return ok(detectedLanguages[0].detectedLanguage);
   } catch (error) {
-    return err({ code: 2, message: "Language detection failed" });
+    return err({
+      message: `Language detection failed: ${String(error)}`,
+    } satisfies Failure);
   } finally {
-    if (detector)
-      detector.destroy();
+    if (detector) detector.destroy();
   }
 }
 
 /**
  * Translate APIでストリーミング翻訳
  */
-export async function* translateStreaming(text: string): AsyncIterable<Result<string, Failure>> {
-  let translator: Translator | undefined = undefined;
+export async function* translateStreaming(
+  text: string,
+): AsyncIterable<Result<string, Failure>> {
+  let translator: Translator | undefined;
   try {
     const sourceLanguage = await detectLanguage(text);
     if (sourceLanguage.isErr()) {
-      yield err({ code: 2, message: sourceLanguage.error.message });
+      yield err({
+        message: sourceLanguage.error.message,
+      } satisfies Failure);
       return;
     }
 
@@ -53,10 +62,11 @@ export async function* translateStreaming(text: string): AsyncIterable<Result<st
         reader.releaseLock();
       }
     } finally {
-      if (translator)
-        translator.destroy();
+      if (translator) translator.destroy();
     }
   } catch (error) {
-    yield err({ code: 2, message: "Failed to translate" });
+    yield err({
+      message: `Failed to translate: ${String(error)}`,
+    } satisfies Failure);
   }
 }
