@@ -2,6 +2,7 @@ import { ContentScriptContext } from '#imports';
 import { getSelectionData } from './utils/selectionManager';
 import { displayPopup } from './utils/uiManager';
 import { translateStreaming } from './ai/text';
+import { enabledStorage } from '../utils/local-storage';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -35,6 +36,10 @@ function initializeContentScript() {
  * メイン処理
  */
 async function mainProcess() {
+  const saved = await enabledStorage.getValue();
+  if (!saved) {
+    return;
+  }
   const selectedDataResult = await getSelectionData();
   if (selectedDataResult.isErr()) {
     console.log(selectedDataResult.error.message);

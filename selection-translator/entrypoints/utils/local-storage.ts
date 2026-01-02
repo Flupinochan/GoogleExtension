@@ -20,7 +20,11 @@ export const languageStorage = storage.defineItem<LanguageCode>('local:selectedL
 });
 
 // 拡張機能の利用可能状態
-export type AVAILABLE_STATUS = "unavailable" | "downloadable" | "downloading" | "available";
-export const availableStorage = storage.defineItem<AVAILABLE_STATUS>('local:availableStatus', {
+export const availableStorage = storage.defineItem<Availability>('local:availableStatus', {
   init: () => 'unavailable',
+});
+
+// 拡張機能の有効/無効設定
+export const enabledStorage = storage.defineItem<boolean>('local:enabledStatus', {
+  init: () => true,
 });

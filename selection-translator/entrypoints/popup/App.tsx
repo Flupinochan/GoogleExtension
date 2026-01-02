@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { LanguageCode, LANGUAGES, languageStorage } from '../utils/local-storage';
+import { enabledStorage, LanguageCode, LANGUAGES, languageStorage } from '../utils/local-storage';
+import Switch from '@mui/material/Switch';
 
 const AppContainer = styled.div`
   width: 200px;
@@ -33,13 +34,19 @@ const GlassSelect = styled.select`
 
 function App() {
   const [language, setLanguage] = useState<LanguageCode>('ja');
+  const [enabled, setEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     const loadLanguage = async () => {
       const saved = await languageStorage.getValue();
       setLanguage(saved);
     };
+    const loadEnabled = async () => {
+      const saved = await enabledStorage.getValue();
+      setEnabled(saved);
+    }
     loadLanguage();
+    loadEnabled();
   }, []);
 
   const handleLanguageChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -48,10 +55,19 @@ function App() {
     await languageStorage.setValue(newLanguage);
   };
 
+  const handleEnableToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const enabled = e.target.checked;
+    setEnabled(enabled)
+    await enabledStorage.setValue(enabled);
+  }
+
   return (
     <AppContainer>
       <div className="glass-container">
         <div className="form-group">
+          <Switch onChange={handleEnableToggle} checked={enabled}></Switch>
+        </div>
+        <div className="form-group" style={{ marginTop: '15px' }}>
           <Label>Translate to</Label>
           <GlassSelect
             value={language}

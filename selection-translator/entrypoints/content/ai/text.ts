@@ -3,13 +3,16 @@ import { languageStorage } from "@/entrypoints/utils/local-storage";
 import { err, ok, Result } from "neverthrow";
 
 /**
- * 入力文字列の言語を判定
+ * LanguageDetectorで入力文字列の言語を判定
  */
 export async function detectLanguage(text: string): Promise<Result<string, Failure>> {
   let detector: LanguageDetector | undefined = undefined;
   try {
     detector = await LanguageDetector.create();
     const detectedLanguages = await detector.detect(text);
+    if (detectedLanguages[0].detectedLanguage === undefined) {
+      return err({ code: 2, message: "Language could not be detected" });
+    }
     return ok(detectedLanguages[0].detectedLanguage);
   } catch (error) {
     return err({ code: 2, message: "Language detection failed" });

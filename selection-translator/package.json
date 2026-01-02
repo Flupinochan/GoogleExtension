@@ -17,6 +17,12 @@
     "prebuild": "node clean-wxt-temp.js"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@fontsource/roboto": "^5.2.9",
+    "@mui/material": "^7.3.6",
+    "@mui/styled-engine-sc": "^7.3.6",
+    "@types/dom-chromium-ai": "^0.0.13",
     "@webext-core/messaging": "^2.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
