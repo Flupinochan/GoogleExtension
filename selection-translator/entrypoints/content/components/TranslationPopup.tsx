@@ -46,7 +46,7 @@ export function TranslationPopup(props: TranslationPopupProps) {
           left: `${position.x}px`,
           top: `${position.y}px`,
           zIndex: 10000,
-          maxWidth: 320,
+          maxWidth: 600,
           minWidth: 120,
           p: 1.5,
           opacity: 0,
