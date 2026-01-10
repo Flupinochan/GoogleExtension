@@ -1,15 +1,18 @@
 import {
   Box,
+  Button,
   FormControl,
   FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
+  Stack,
   Switch,
 } from "@mui/material";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { sendMessage } from "../utils/messaging";
 import {
   enabledStorage,
   LANGUAGES,
@@ -45,30 +48,62 @@ function App() {
     await enabledStorage.setValue(enabled);
   };
 
+  const handleDomSelector = async (_e: React.MouseEvent<HTMLButtonElement>) => {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    window.close();
+    if (tab.id) {
+      await sendMessage("domSelectorEnabled", true, tab.id);
+    }
+  };
+
+  const handleAllTranslation = async (
+    _e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    window.close();
+    if (tab.id) {
+      await sendMessage("allTranslation", undefined, tab.id);
+    }
+  };
+
   if (language === null || enabled === null) {
     return null;
   }
 
   return (
-    <Box sx={{ width: 200, height: 200, p: 2 }}>
-      <FormControlLabel
-        control={<Switch checked={enabled} onChange={handleEnableToggle} />}
-        label="Enable"
-      />
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel>Translate to</InputLabel>
-        <Select
-          value={language}
-          onChange={handleLanguageChange}
-          label="Translate to"
-        >
-          {LANGUAGES.map((lang) => (
-            <MenuItem key={lang.code} value={lang.code}>
-              {lang.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <Box sx={{ width: 200, height: 250, p: 2 }}>
+      <Stack spacing={2}>
+        <FormControlLabel
+          control={<Switch checked={enabled} onChange={handleEnableToggle} />}
+          label="Enable"
+        />
+        <FormControl fullWidth>
+          <InputLabel>Translate to</InputLabel>
+          <Select
+            value={language}
+            onChange={handleLanguageChange}
+            label="Translate to"
+          >
+            {LANGUAGES.map((lang) => (
+              <MenuItem key={lang.code} value={lang.code}>
+                {lang.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button variant="outlined" onClick={handleDomSelector}>
+          DOM CLICK
+        </Button>
+        <Button variant="outlined" onClick={handleAllTranslation}>
+          ALL
+        </Button>
+      </Stack>
     </Box>
   );
 }

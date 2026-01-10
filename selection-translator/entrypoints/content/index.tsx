@@ -1,17 +1,16 @@
+import { createRoot } from "react-dom/client";
 import type { ContentScriptContext } from "#imports";
 import { enabledStorage } from "../utils/storage";
-import { displayTranslationPopup } from "./components/translationPopupManager";
+import { displayTranslationPopup } from "./components/TranslationPopupManager";
+import { DomSelector } from "./services/domSelector";
 import { getSelectionData } from "./services/selection";
 import { translateStreaming } from "./services/translation";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
+  runAt: "document_end",
   main(_ctx: ContentScriptContext) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initializeContentScript);
-    } else {
-      initializeContentScript();
-    }
+    initializeContentScript();
   },
 });
 
@@ -29,6 +28,12 @@ function initializeContentScript() {
     if (selection) selection.removeAllRanges();
   });
   document.addEventListener("mouseup", mainProcess);
+
+  // dom selector overlay setup
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  root.render(<DomSelector />);
 }
 
 /**

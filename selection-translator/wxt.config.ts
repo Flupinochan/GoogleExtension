@@ -6,8 +6,8 @@ export default defineConfig({
   manifest: {
     name: "SelectionTranslator",
     short_name: "TransTool",
-    version: "0.0.4",
-    version_name: "0.0.4",
+    version: "0.0.5",
+    version_name: "0.0.5",
     description: "A tool that translates selected text!",
     // description: "A tool that translates selected text and performs OCR on clicked images!",
     author: { email: "flupino@metalmental.net" },

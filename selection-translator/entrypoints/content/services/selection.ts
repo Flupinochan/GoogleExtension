@@ -1,6 +1,6 @@
 import { err, ok, type Result } from "neverthrow";
 import type { Failure } from "@/types";
-import { POPUP_ID } from "../components/translationPopupManager";
+import { POPUP_ID } from "../components/TranslationPopupManager";
 
 export interface selectedData {
   selectedText: string; // 選択した文字列

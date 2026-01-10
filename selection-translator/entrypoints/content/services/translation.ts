@@ -4,10 +4,11 @@ import type { Failure } from "@/types";
 
 /**
  * LanguageDetectorで入力文字列の言語を判定
+ * 翻訳先はpopup.htmlで選択した言語
+ * @param text 言語判定する文字列
+ * @returns 判定された言語コード
  */
-export async function detectLanguage(
-  text: string,
-): Promise<Result<string, Failure>> {
+async function detectLanguage(text: string): Promise<Result<string, Failure>> {
   let detector: LanguageDetector | undefined;
   try {
     detector = await LanguageDetector.create();
@@ -29,6 +30,8 @@ export async function detectLanguage(
 
 /**
  * Translate APIでストリーミング翻訳
+ * @param text 翻訳する文字列
+ * @returns 翻訳結果文字列の非同期イテレータ
  */
 export async function* translateStreaming(
   text: string,
