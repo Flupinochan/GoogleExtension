@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -12,12 +13,13 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { sendMessage } from "../utils/messaging";
+import { sendToContentScript } from "../utils/messaging";
+import { retryPolicy } from "../utils/retry";
 import {
-  enabledStorage,
+  extensionEnabledStorage,
   LANGUAGES,
   type LanguageCode,
-  languageStorage,
+  targetLangStorage,
 } from "../utils/storage";
 
 function App() {
@@ -27,8 +29,8 @@ function App() {
   useEffect(() => {
     const loadSettings = async () => {
       const [savedLanguage, savedEnabled] = await Promise.all([
-        languageStorage.getValue(),
-        enabledStorage.getValue(),
+        retryPolicy.execute(() => targetLangStorage.getValue()),
+        retryPolicy.execute(() => extensionEnabledStorage.getValue()),
       ]);
       setLanguage(savedLanguage);
       setEnabled(savedEnabled);
@@ -39,71 +41,62 @@ function App() {
   const handleLanguageChange = async (e: SelectChangeEvent) => {
     const language = e.target.value as LanguageCode;
     setLanguage(language);
-    await languageStorage.setValue(language);
+    await retryPolicy.execute(() => targetLangStorage.setValue(language));
   };
 
   const handleEnableToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const enabled = e.target.checked;
     setEnabled(enabled);
-    await enabledStorage.setValue(enabled);
+    await retryPolicy.execute(() => extensionEnabledStorage.setValue(enabled));
   };
-
-  const handleDomSelector = async (_e: React.MouseEvent<HTMLButtonElement>) => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    window.close();
-    if (tab.id) {
-      await sendMessage("domSelectorEnabled", true, tab.id);
-    }
-  };
-
-  const handleAllTranslation = async (
-    _e: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    window.close();
-    if (tab.id) {
-      await sendMessage("allTranslation", undefined, tab.id);
-    }
-  };
-
-  if (language === null || enabled === null) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: 200, height: 250, p: 2 }}>
-      <Stack spacing={2}>
-        <FormControlLabel
-          control={<Switch checked={enabled} onChange={handleEnableToggle} />}
-          label="Enable"
-        />
-        <FormControl fullWidth>
-          <InputLabel>Translate to</InputLabel>
-          <Select
-            value={language}
-            onChange={handleLanguageChange}
-            label="Translate to"
+      {language === null || enabled === null ? (
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Stack spacing={2}>
+          <FormControlLabel
+            control={<Switch checked={enabled} onChange={handleEnableToggle} />}
+            label="Enable"
+          />
+          <FormControl fullWidth>
+            <InputLabel>Translate to</InputLabel>
+            <Select
+              value={language}
+              onChange={handleLanguageChange}
+              label="Translate to"
+            >
+              {LANGUAGES.map((lang) => (
+                <MenuItem key={lang.code} value={lang.code}>
+                  {lang.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="outlined"
+            onClick={() => sendToContentScript("domSelectorEnabled", undefined)}
           >
-            {LANGUAGES.map((lang) => (
-              <MenuItem key={lang.code} value={lang.code}>
-                {lang.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button variant="outlined" onClick={handleDomSelector}>
-          DOM CLICK
-        </Button>
-        <Button variant="outlined" onClick={handleAllTranslation}>
-          ALL
-        </Button>
-      </Stack>
+            DOM CLICK
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => sendToContentScript("allTranslation", undefined)}
+          >
+            ALL
+          </Button>
+        </Stack>
+      )}
     </Box>
   );
 }

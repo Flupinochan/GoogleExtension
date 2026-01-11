@@ -1,3 +1,7 @@
+/**
+ * ui theme
+ * auto judge dark or light mode
+ */
 import { createTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useMemo } from "react";
@@ -19,7 +23,7 @@ export const useAppTheme = () => {
 
   const theme = useMemo(
     () => createAppTheme(prefersDarkMode),
-    [prefersDarkMode],
+    [prefersDarkMode]
   );
 
   return theme;

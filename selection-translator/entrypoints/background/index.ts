@@ -1,66 +1,116 @@
 import { err, ok, type Result } from "neverthrow";
-import type { Failure } from "../../types";
-import { availableStorage } from "../utils/storage";
+import { retryPolicy } from "../utils/retry";
+import {
+  aiAvailableStorage,
+  LANGUAGES,
+  targetLangStorage,
+  type LanguageCode,
+} from "../utils/storage";
 
 /**
  * WXTでは、拡張機能のAPI「chrome」のかわりに「browser」型安全を使用
+ * 拡張機能インストール時の初期化処理
+ * - LLMモデルのダウンロード
+ * - 翻訳元、翻訳先のデフォルト言語設定
+ *   - デフォルトの翻訳元: "en"
+ *   - デフォルトの翻訳先: ブラウザの言語設定に基づく(対応言語がない場合は"ja")
  */
+const DEFAULT_TARGET_LANGUAGE: LanguageCode = "ja";
+const DEFAULT_SOURCE_LANGUAGE: LanguageCode = "en";
+
 export default defineBackground(() => {
-  // Service Workerインストール時の処理
   browser.runtime.onInstalled.addListener(async () => {
-    const result = await aiModelDownload();
-    // ダウンロード結果をlocal storageに保存
-    // popup.html から利用状態を取得
-    if (result.isOk()) {
-      await availableStorage.setValue("available");
+    const defaultLang = await setDefaultTargetLanguage();
+    const translator = await downloadTranslator(
+      defaultLang.isOk() ? defaultLang.value : DEFAULT_TARGET_LANGUAGE
+    );
+    await downloadLanguageDetector();
+
+    // popup.html から利用状態を取得するために保存
+    if (translator.isOk()) {
+      await aiAvailableStorage.setValue("available");
     } else {
-      await availableStorage.setValue("unavailable");
-      console.log(result.error.message);
+      await aiAvailableStorage.setValue("unavailable");
     }
   });
 });
 
 /**
- * 事前に生成AIのModelをダウンロード
+ * デフォルトの翻訳先言語を設定
+ * @returns
  */
-async function aiModelDownload(): Promise<Result<void, Failure>> {
-  // Translatorのダウンロード
-  let translator: Translator | undefined;
+async function setDefaultTargetLanguage(): Promise<Result<LanguageCode, void>> {
   try {
-    translator = await Translator.create({
-      sourceLanguage: "en",
-      targetLanguage: "ja",
-      monitor(m) {
-        m.addEventListener("downloadprogress", (e) => {
-          console.log(`Translator Downloaded ${e.loaded * 100}%`);
-        });
-      },
-    });
+    // chromeブラウザ設定から言語設定を取得
+    const userLang = await retryPolicy.execute(() =>
+      browser.i18n.getAcceptLanguages()
+    );
+    const availableLangCodes = LANGUAGES.map((lang) => lang.code);
+    const targetLang = userLang[0] as LanguageCode;
+    if (availableLangCodes.includes(targetLang)) {
+      await retryPolicy.execute(() => targetLangStorage.setValue(targetLang));
+    }
+    return ok(targetLang);
   } catch (error) {
-    return err({
-      message: `Translator APIでダウンロードに失敗しました: ${String(error)}`,
-    } satisfies Failure);
-  } finally {
-    if (translator) translator.destroy();
+    console.error("デフォルトの翻訳先言語の取得に失敗しました:", String(error));
+    return err();
   }
+}
 
-  // LanguageDetectorのダウンロード
+/**
+ * LanguageDetectorモデルのダウンロード
+ * @returns
+ */
+async function downloadLanguageDetector(): Promise<Result<void, void>> {
   let detector: LanguageDetector | undefined;
   try {
-    detector = await LanguageDetector.create({
-      monitor(m) {
-        m.addEventListener("downloadprogress", (e) => {
-          console.log(`LanguageDetector Downloaded ${e.loaded * 100}%`);
-        });
-      },
-    });
+    detector = await retryPolicy.execute(() =>
+      LanguageDetector.create({
+        monitor(m) {
+          m.addEventListener("downloadprogress", (e) => {
+            console.log(`LanguageDetector Downloaded ${e.loaded * 100}%`);
+          });
+        },
+      })
+    );
+    return ok();
   } catch (error) {
-    return err({
-      message: `LanguageDetector APIでダウンロードに失敗しました: ${String(error)}`,
-    } satisfies Failure);
+    console.error(
+      `LanguageDetectorモデルのダウンロードに失敗しました: ${String(error)}`
+    );
+    return err();
   } finally {
     if (detector) detector.destroy();
   }
+}
 
-  return ok(undefined);
+/**
+ * Translatorモデルのダウンロード
+ * @returns
+ */
+async function downloadTranslator(
+  targetLang: LanguageCode
+): Promise<Result<void, void>> {
+  let translator: Translator | undefined;
+  try {
+    translator = await retryPolicy.execute(() =>
+      Translator.create({
+        sourceLanguage: DEFAULT_SOURCE_LANGUAGE,
+        targetLanguage: targetLang,
+        monitor(m) {
+          m.addEventListener("downloadprogress", (e) => {
+            console.log(`Translator Downloaded ${e.loaded * 100}%`);
+          });
+        },
+      })
+    );
+    return ok();
+  } catch (error) {
+    console.error(
+      `Translatorモデルのダウンロードに失敗しました: ${String(error)}`
+    );
+    return err();
+  } finally {
+    if (translator) translator.destroy();
+  }
 }

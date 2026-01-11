@@ -1,20 +1,19 @@
+import { useAppTheme } from "@/entrypoints/utils/theme";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { useEffect, useRef } from "react";
-import { useAppTheme } from "@/entrypoints/utils/theme";
 
 interface TranslationPopupProps {
   text: string;
   position: { x: number; y: number };
   onClose: () => void;
+  isLoading?: boolean;
 }
 
 export function TranslationPopup(props: TranslationPopupProps) {
   const theme = useAppTheme();
-
-  const { text, position, onClose } = props;
+  const { text, position, onClose, isLoading = false } = props;
   const popupRef = useRef<HTMLDivElement>(null);
-  const isLoading = text === "Translating...";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -26,13 +25,22 @@ export function TranslationPopup(props: TranslationPopupProps) {
       }
     };
 
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    // ポップアップ表示直後のクリックを無視するための遅延
     const timer = setTimeout(() => {
       document.addEventListener("click", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
     }, 100);
 
     return () => {
       clearTimeout(timer);
       document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [onClose]);
 
@@ -41,6 +49,8 @@ export function TranslationPopup(props: TranslationPopupProps) {
       <Paper
         ref={popupRef}
         elevation={8}
+        role="dialog"
+        aria-label="Translation popup"
         sx={{
           position: "absolute",
           left: `${position.x}px`,

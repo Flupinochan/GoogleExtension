@@ -1,9 +1,9 @@
 /**
- * Storage設定
+ * local storage
  */
 import { storage } from "#imports";
 
-// 1.翻訳先言語設定
+// 1.translation target language
 export const LANGUAGES = [
   { code: "en", name: "English" },
   { code: "ja", name: "日本語" },
@@ -17,25 +17,25 @@ export const LANGUAGES = [
   { code: "it", name: "Italiano" },
 ] as const;
 export type LanguageCode = (typeof LANGUAGES)[number]["code"];
-export const languageStorage = storage.defineItem<LanguageCode>(
+export const targetLangStorage = storage.defineItem<LanguageCode>(
   "local:selectedLanguage",
   {
-    init: () => "ja",
-  },
+    init: () => "en",
+  }
 );
 
-// 2.生成AI機能の利用可能状態
-export const availableStorage = storage.defineItem<Availability>(
+// 2.language detector API and translator API availability status
+export const aiAvailableStorage = storage.defineItem<Availability>(
   "local:availableStatus",
   {
     init: () => "unavailable",
-  },
+  }
 );
 
-// 3.拡張機能の有効/無効設定
-export const enabledStorage = storage.defineItem<boolean>(
+// 3.chrome extension enabled/disabled status
+export const extensionEnabledStorage = storage.defineItem<boolean>(
   "local:enabledStatus",
   {
     init: () => true,
-  },
+  }
 );
