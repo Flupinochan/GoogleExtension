@@ -20,7 +20,7 @@ export type LanguageCode = (typeof LANGUAGES)[number]["code"];
 export const targetLangStorage = storage.defineItem<LanguageCode>(
   "local:selectedLanguage",
   {
-    init: () => "en",
+    init: () => "ja",
   }
 );
 

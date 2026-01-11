@@ -2,7 +2,7 @@ import type { Failure } from "@/types";
 import { err, ok, type Result } from "neverthrow";
 import { POPUP_ID } from "../components/TranslationPopupManager";
 
-export interface selectedData {
+export interface SelectedData {
   text: string; // 選択した文字列
   count: number; // 選択した文字数
   dom: Range; // 選択したDOM位置
@@ -11,7 +11,7 @@ export interface selectedData {
 /**
  * Selection APIで選択されたデータを返却
  */
-export function getSelectionData(): Result<selectedData, Failure> {
+export function getSelectionData(): Result<SelectedData, Failure> {
   // 1文字以上選択されていなければエラー
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {

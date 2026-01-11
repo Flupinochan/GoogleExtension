@@ -1,10 +1,13 @@
+/**
+ * common retry policy
+ */
 import { ExponentialBackoff, handleAll, retry } from "cockatiel";
 
 export const retryPolicy = retry(handleAll, {
   maxAttempts: 3,
   backoff: new ExponentialBackoff({
     initialDelay: 1000,
-    exponent: 2,
+    exponent: 1,
   }),
 });
 
