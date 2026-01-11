@@ -39,3 +39,22 @@ export const extensionEnabledStorage = storage.defineItem<boolean>(
     init: () => true,
   }
 );
+
+// 4.translation excluded tags
+export const DEFAULT_EXCLUDED_TAGS = [
+  "pre",
+  "code",
+  "script",
+  "style",
+  "math",
+  "kbd",
+  "samp",
+  "var",
+  "textarea",
+];
+export const excludedTagsStorage = storage.defineItem<string[]>(
+  "local:excludedTags",
+  {
+    init: () => DEFAULT_EXCLUDED_TAGS,
+  }
+);

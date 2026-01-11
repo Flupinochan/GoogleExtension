@@ -1,3 +1,5 @@
+import { retryPolicy } from "@/entrypoints/utils/retry";
+import { excludedTagsStorage } from "@/entrypoints/utils/storage";
 import { translateStreaming } from "../services/translation";
 
 /**
@@ -8,11 +10,20 @@ import { translateStreaming } from "../services/translation";
 export async function translateTextNodes(
   rootElement: HTMLElement
 ): Promise<void> {
+  const excludedTags =
+    (await retryPolicy.execute(() => excludedTagsStorage.getValue())) || [];
+
   const walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) =>
-      node.parentElement?.closest("pre, code, script, style")
+    acceptNode: (node) => {
+      if (excludedTags.length === 0) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      const excludedSelector = excludedTags.join(", ");
+      return node.parentElement?.closest(excludedSelector)
         ? NodeFilter.FILTER_REJECT
-        : NodeFilter.FILTER_ACCEPT,
+        : NodeFilter.FILTER_ACCEPT;
+    },
   });
 
   let node: Node | null = walker.nextNode();
