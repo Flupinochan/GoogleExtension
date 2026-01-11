@@ -1,8 +1,8 @@
 import { err, ok, type Result } from "neverthrow";
+import { getDefaultTargetLang } from "../utils/language";
 import { retryPolicy } from "../utils/retry";
 import {
   aiAvailableStorage,
-  LANGUAGES,
   targetLangStorage,
   type LanguageCode,
 } from "../utils/storage";
@@ -42,17 +42,11 @@ export default defineBackground(() => {
 async function setDefaultTargetLanguage(): Promise<Result<LanguageCode, void>> {
   try {
     // chromeブラウザ設定から言語設定を取得
-    const userLang = await retryPolicy.execute(() =>
-      browser.i18n.getAcceptLanguages()
-    );
-    const availableLangCodes = LANGUAGES.map((lang) => lang.code);
-    const targetLang = userLang[0] as LanguageCode;
-    if (availableLangCodes.includes(targetLang)) {
-      await retryPolicy.execute(() => targetLangStorage.setValue(targetLang));
-    }
+    const targetLang = await getDefaultTargetLang();
+    await retryPolicy.execute(() => targetLangStorage.setValue(targetLang));
     return ok(targetLang);
   } catch (error) {
-    console.error("デフォルトの翻訳先言語の取得に失敗しました:", String(error));
+    console.error("デフォルトの翻訳先言語の設定に失敗しました:", String(error));
     return err();
   }
 }

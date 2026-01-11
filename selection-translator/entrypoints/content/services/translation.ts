@@ -1,3 +1,7 @@
+import {
+  getDefaultSourceLang,
+  getDefaultTargetLang,
+} from "@/entrypoints/utils/language";
 import { retryPolicy } from "@/entrypoints/utils/retry";
 import { targetLangStorage } from "@/entrypoints/utils/storage";
 import { Failure } from "@/types";
@@ -39,11 +43,10 @@ export async function* translateStreaming(
     const detectLang = await detectLanguage(text);
     const sourceLang = detectLang.isOk()
       ? detectLang.value
-      : document.documentElement.lang;
+      : getDefaultSourceLang();
 
     const targetLang =
-      (await targetLangStorage.getValue()) ??
-      (await browser.i18n.getAcceptLanguages())[0];
+      (await targetLangStorage.getValue()) ?? (await getDefaultTargetLang());
 
     translator = await retryPolicy.execute(() =>
       Translator.create({
