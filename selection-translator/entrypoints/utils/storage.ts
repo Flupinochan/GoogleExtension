@@ -1,7 +1,6 @@
 /**
  * local storage
  */
-import { storage } from "#imports";
 
 // 1.translation target language
 export const LANGUAGES = [
