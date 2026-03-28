@@ -98,7 +98,7 @@ export async function* translateImage(
         expectedOutputs: [{ type: "text", languages: [targetLang] }],
       }),
     );
-    const refImage = await (await fetch(imageUrl)).blob();
+    const refImage = await toBlob(imageUrl);
     try {
       const stream = await session.promptStreaming([
         {
@@ -136,4 +136,26 @@ export async function* translateImage(
       message: `Image translation failed: ${String(error)}`,
     } satisfies Failure);
   }
+}
+
+async function toBlob(imageUrl: string): Promise<Blob> {
+  if (imageUrl.startsWith("data:")) {
+    const res = await fetch(imageUrl);
+    return res.blob();
+  }
+
+  if (imageUrl.startsWith("blob:")) {
+    try {
+      return await (await fetch(imageUrl)).blob();
+    } catch {
+      const b = await fetch(imageUrl).then((r) => r.blob());
+      const bmp = await createImageBitmap(b);
+      const canvas = new OffscreenCanvas(bmp.width, bmp.height);
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(bmp, 0, 0);
+      return await canvas.convertToBlob();
+    }
+  }
+
+  return await (await fetch(imageUrl)).blob();
 }

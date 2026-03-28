@@ -22,11 +22,12 @@ const DEFAULT_SOURCE_LANGUAGE: LanguageCode = "en";
 export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(async () => {
     const defaultLang = await setDefaultTargetLanguage();
-    const translator = await downloadTranslator(
-      defaultLang.isOk() ? defaultLang.value : DEFAULT_TARGET_LANGUAGE,
-    );
+    const targetLang = defaultLang.isOk()
+      ? defaultLang.value
+      : DEFAULT_TARGET_LANGUAGE;
+    const translator = await downloadTranslator(targetLang);
     await downloadLanguageDetector();
-    await downloadLanguageModel();
+    await downloadLanguageModel(targetLang);
     createContextMenu();
 
     // context menu選択時のcontent scriptへimageUrlのメッセージ送信
@@ -126,11 +127,14 @@ async function downloadTranslator(
 /**
  * LanguageModelのダウンロード
  */
-async function downloadLanguageModel(): Promise<Result<void, void>> {
+async function downloadLanguageModel(
+  targetLang: LanguageCode,
+): Promise<Result<void, void>> {
   let model: LanguageModel | undefined;
   try {
     model = await retryPolicy.execute(() =>
       LanguageModel.create({
+        expectedOutputs: [{ type: "text", languages: [targetLang] }],
         monitor(m) {
           m.addEventListener("downloadprogress", (e) => {
             console.log(`LanguageModel Downloaded ${e.loaded * 100}%`);
