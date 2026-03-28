@@ -1,5 +1,6 @@
 import { err, ok, type Result } from "neverthrow";
 import { getDefaultTargetLang } from "../utils/language";
+import { sendMessage } from "../utils/messaging";
 import { retryPolicy } from "../utils/retry";
 import {
   aiAvailableStorage,
@@ -22,9 +23,22 @@ export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(async () => {
     const defaultLang = await setDefaultTargetLanguage();
     const translator = await downloadTranslator(
-      defaultLang.isOk() ? defaultLang.value : DEFAULT_TARGET_LANGUAGE
+      defaultLang.isOk() ? defaultLang.value : DEFAULT_TARGET_LANGUAGE,
     );
     await downloadLanguageDetector();
+    await downloadLanguageModel();
+    createContextMenu();
+
+    // context menu選択時のcontent scriptへimageUrlのメッセージ送信
+    browser.contextMenus.onClicked.addListener(async (info, tab) => {
+      if (info.menuItemId !== CONTEXT_MENU_ID || !tab?.id || !info.srcUrl) {
+        return;
+      }
+      const imageUrl = info.srcUrl;
+      await retryPolicy.execute(() =>
+        sendMessage("imageFromContextMenu", imageUrl, tab.id),
+      );
+    });
 
     // popup.html から利用状態を取得するために保存
     if (translator.isOk()) {
@@ -65,12 +79,12 @@ async function downloadLanguageDetector(): Promise<Result<void, void>> {
             console.log(`LanguageDetector Downloaded ${e.loaded * 100}%`);
           });
         },
-      })
+      }),
     );
     return ok();
   } catch (error) {
     console.error(
-      `LanguageDetectorモデルのダウンロードに失敗しました: ${String(error)}`
+      `LanguageDetectorモデルのダウンロードに失敗しました: ${String(error)}`,
     );
     return err();
   } finally {
@@ -83,7 +97,7 @@ async function downloadLanguageDetector(): Promise<Result<void, void>> {
  * @returns
  */
 async function downloadTranslator(
-  targetLang: LanguageCode
+  targetLang: LanguageCode,
 ): Promise<Result<void, void>> {
   let translator: Translator | undefined;
   try {
@@ -96,15 +110,54 @@ async function downloadTranslator(
             console.log(`Translator Downloaded ${e.loaded * 100}%`);
           });
         },
-      })
+      }),
     );
     return ok();
   } catch (error) {
     console.error(
-      `Translatorモデルのダウンロードに失敗しました: ${String(error)}`
+      `Translatorモデルのダウンロードに失敗しました: ${String(error)}`,
     );
     return err();
   } finally {
     if (translator) translator.destroy();
   }
+}
+
+/**
+ * LanguageModelのダウンロード
+ */
+async function downloadLanguageModel(): Promise<Result<void, void>> {
+  let model: LanguageModel | undefined;
+  try {
+    model = await retryPolicy.execute(() =>
+      LanguageModel.create({
+        monitor(m) {
+          m.addEventListener("downloadprogress", (e) => {
+            console.log(`LanguageModel Downloaded ${e.loaded * 100}%`);
+          });
+        },
+      }),
+    );
+    return ok();
+  } catch (error) {
+    console.error(
+      `LanguageModelのダウンロードに失敗しました: ${String(error)}`,
+    );
+    return err();
+  } finally {
+    if (model) model.destroy();
+  }
+}
+
+/**
+ * 画像を右クリックしたときに表示されるメニューを追加
+ */
+
+const CONTEXT_MENU_ID = "metalmental-translate-image";
+function createContextMenu() {
+  browser.contextMenus.create({
+    id: CONTEXT_MENU_ID,
+    title: "Translate image",
+    contexts: ["image"],
+  });
 }

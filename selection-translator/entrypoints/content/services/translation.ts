@@ -36,7 +36,7 @@ async function detectLanguage(text: string): Promise<Result<string, void>> {
  * @returns 翻訳結果文字列の非同期イテレータ
  */
 export async function* translateStreaming(
-  text: string
+  text: string,
 ): AsyncIterable<Result<string, Failure>> {
   let translator: Translator | undefined;
   try {
@@ -52,7 +52,7 @@ export async function* translateStreaming(
       Translator.create({
         sourceLanguage: sourceLang,
         targetLanguage: targetLang,
-      })
+      }),
     );
 
     try {
@@ -75,6 +75,65 @@ export async function* translateStreaming(
     yield err({
       type: "translation_failed",
       message: `Translation failed: ${String(error)}`,
+    } satisfies Failure);
+  }
+}
+
+/**
+ * Prompt APIで画像のテキストを翻訳
+ * @param imageUrl 翻訳する画像のdataURL
+ * @returns 翻訳結果文字列の非同期イテレータ
+ */
+export async function* translateImage(
+  imageUrl: string,
+): AsyncIterable<Result<string, Failure>> {
+  let session: LanguageModel | undefined;
+  try {
+    console.log("Translating image...");
+    const targetLang =
+      (await targetLangStorage.getValue()) ?? (await getDefaultTargetLang());
+    session = await retryPolicy.execute(() =>
+      LanguageModel.create({
+        expectedInputs: [{ type: "image" }],
+        expectedOutputs: [{ type: "text", languages: [targetLang] }],
+      }),
+    );
+    const refImage = await (await fetch(imageUrl)).blob();
+    try {
+      const stream = await session.promptStreaming([
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              value: `Translate the text in the image to ${targetLang}.`,
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [{ type: "image", value: refImage }],
+        },
+      ]);
+      const reader = stream.getReader();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          yield ok(value);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    } finally {
+      if (session) session.destroy();
+    }
+  } catch (error) {
+    console.error(`Image translation failed: ${String(error)}`);
+    yield err({
+      type: "translation_failed",
+      message: `Image translation failed: ${String(error)}`,
     } satisfies Failure);
   }
 }
